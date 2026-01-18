@@ -1,0 +1,25 @@
+name: Weekly Wayback Archive
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"   # every Sunday at 03:00 UTC
+  workflow_dispatch:     # allow manual runs
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run archiver
+        run: python wayback_archive.py

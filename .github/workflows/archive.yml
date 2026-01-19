@@ -1,20 +1,23 @@
-name: Daily Wayback Archive
+name: Wayback Archiver
 
 on:
+  # Run once per day (03:00 UTC ≈ night in US/EU)
   schedule:
-    - cron: "0 5 * * *"   # every day at 05:00 UTC
+    - cron: "0 3 * * *"
+
+  # Allow manual runs
   workflow_dispatch:
 
 jobs:
   archive:
     runs-on: ubuntu-latest
-    timeout-minutes: 360   # 6 hours
+
+    # GitHub hard limit is 6h — be explicit
+    timeout-minutes: 360
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -22,17 +25,34 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
+      # ---- MAIN PIPELINE ----
       - name: Run archive pipeline
         run: python runner.py
 
-      - name: Commit state files
+      # ---- DEBUG (optional but recommended; you can remove later) ----
+      - name: Debug state files
+        if: always()
+        run: |
+          echo "Working directory:"
+          pwd
+          echo "Files:"
+          ls -la
+          echo "last_link.txt:"
+          cat last_link.txt || echo "NO last_link.txt"
+          echo "connection_errors.txt:"
+          cat connection_errors.txt || echo "NO connection_errors.txt"
+
+      # ---- COMMIT STATE FILES ----
+      - name: Commit archive state
         if: always()
         run: |
           git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config user.email "github-actions@github.com"
 
           git add last_link.txt connection_errors.txt || true
           git commit -m "Update archive state [automated]" || true
-          git push
+          git push || true

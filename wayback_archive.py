@@ -65,10 +65,10 @@ class WaybackArchive:
     def save(self, site: str) -> None:
         try:
             requests.get("https://web.archive.org/save/" + site)
-        except requests.exceptions.ConnectionError:
-            print('connection error')
-            with open("connection_errors.txt",'a') as f:
-                f.write(f"{site}\n")
+        except requests.exceptions.RequestException as e:
+            print(f"connection error: {e}")
+            with open("connection_errors.txt", "a") as f:
+                f.write(site + "\n")
         finally:
             # This will record the last link worked on after 5 hours and 50 minutes
             if self.late_checker():

@@ -1,22 +1,23 @@
-name: Wayback Archive Pipeline
+name: Daily Wayback Archive
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "30 11 * * 0"   # Sunday 7:30 AM ET
-
-permissions:
-  contents: write
+    - cron: "0 5 * * *"   # every day at 05:00 UTC
+  workflow_dispatch:
 
 jobs:
-  run:
+  archive:
     runs-on: ubuntu-latest
-    timeout-minutes: 360   # GitHub hard limit (6 hours)
+    timeout-minutes: 360   # 6 hours
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -25,3 +26,13 @@ jobs:
 
       - name: Run archive pipeline
         run: python runner.py
+
+      - name: Commit state files
+        if: always()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add last_link.txt connection_errors.txt || true
+          git commit -m "Update archive state [automated]" || true
+          git push

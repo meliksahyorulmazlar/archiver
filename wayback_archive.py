@@ -66,7 +66,7 @@ class WaybackArchive:
     # This method will save a given website link on the wayback machine
     def save(self, site: str) -> None:
         try:
-            requests.get("https://web.archive.org/save/" + site)
+            requests.get("https://web.archive.org/save/" + site,timeout=45)
         except requests.exceptions.RequestException as e:
             print(f"connection error: {e}")
             with open("connection_errors.txt", "a") as f:

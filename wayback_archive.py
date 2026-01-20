@@ -16,7 +16,7 @@ class WaybackArchive:
     # This method checks if it should start recording the last link
     def late_checker(self)->bool:
         current_time = time.time()- self.start_time
-        cutoff =  (55*60)
+        cutoff =  (3*3600)+(55*60)
         return current_time-cutoff >= 0
 
     # This will find all the valid links to be archived on the wayback machine

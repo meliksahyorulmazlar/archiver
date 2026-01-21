@@ -76,12 +76,9 @@ class WaybackArchive:
     def save(self, site: str) -> None:
         main = 'https://web.archive.org/save/'
         try:
-            response = self.session.get(main+site, timeout=20)
+            response = self.session.get(main+site)
             print("done")
-        except requests.exceptions.Timeout:
-            print("TIMEOUT:", site)
-        except requests.exceptions.ConnectionError as e:
-            print("CONNECTION ERROR:", site)
+        
         except requests.exceptions.RequestException as e:
             print("REQUEST FAILED:", site)
 

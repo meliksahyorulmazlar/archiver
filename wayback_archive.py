@@ -10,7 +10,6 @@ class WaybackArchive:
     def __init__(self):
         self.start_time = time.time()
         self.found_links = []
-        
         self.find()
         self.save_all()
         
@@ -58,12 +57,6 @@ class WaybackArchive:
 
     # This method will save all the links on the wayback machine
     def save_all(self)->None:
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (compatible; WaybackArchiver/1.0)",
-            "Accept": "*/*",
-            "Connection": "close"
-        })
         for link in self.found_links:
             print(f'saving {link}')
             self.save(link)
@@ -76,11 +69,10 @@ class WaybackArchive:
     def save(self, site: str) -> None:
         main = 'https://web.archive.org/save/'
         try:
-            response = self.session.get(main+site)
-            print("done")
-        
-        except requests.exceptions.RequestException as e:
-            print("REQUEST FAILED:", site)
+            requests.get("https://web.archive.org/save/" + site)
+        except requests.exceptions.ConnectionError:
+            print('connection error')
+            
 
 
 if __name__ == "__main__":

@@ -31,19 +31,16 @@ class WaybackArchive:
 
         while links:
             print(len(links))
-            if links[0] in self.found_links:
-                # This link has already been explored
-                links.pop(0)
-            else:
+            if links[0] not in self.found_links:
                 if 'wp-content' in links[0]:
                     # These are photos,pdfs that have no links
                     self.found_links.append(links[0])
-                    links.pop(0)
                 else:
                     # The link has not been explored-so it finds new links
                     soup = BeautifulSoup(requests.get(links[0]).text, 'lxml')
                     soup = str(soup)
                     new_links = re.findall(r'"(.*?)"', soup)
+                    # filters out links that are css or js links
                     new_links = [link for link in new_links if link.startswith('https://peisctehran') and 'css' not in link and 'js' not in link]
                     for new_link in new_links:
                         if new_link not in self.found_links:
@@ -51,7 +48,8 @@ class WaybackArchive:
                                 print(new_link)
                                 links.append(new_link)
                     self.found_links.append(links[0])
-                    links.pop(0)
+            links.pop(0)
+
         random.shuffle(self.found_links)
         print("done finding links")
 
